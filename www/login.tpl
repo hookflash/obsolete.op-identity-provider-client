@@ -89,6 +89,43 @@ either expressed or implied, of the FreeBSD Project.
     });
 
 </script>
+
+<script type="text/javascript">
+    window.addEventListener("message", handleTestUiAutomation, false);
+
+    function handleTestUiAutomation(event) {
+        try {
+            var message = JSON.parse(event.data);
+            var regInfo = message._test_register;
+            var loginInfo = message._test_login;
+            if(regInfo) {
+                var regInfo = message._test_register;
+                doRegister(regInfo.name, regInfo.username, regInfo.password);
+            } else if(loginInfo) {
+                var loginInfo = message._test_login;
+                doLogin(loginInfo.username, loginInfo.password);
+            }
+        } catch(e) {
+            console.error('test-ui-login-error', e.message);
+            throw e;
+        }
+    }
+
+    function doRegister(name, username, password) {
+        HF.showView('federated-signup');
+        $('#signUpDisplayName').val(name);
+        $('#signUpId').val(username);
+        $('#signUpPassword').val(password);
+        $('#op-federated-signup-button').click()
+    }
+
+    function doLogin(username, password){
+        HF.showView('federated-login');
+        $('#loginId').val(username);
+        $('#loginPassword').val(password);
+        $('#op-federated-login-button').click();
+    }
+</script>
 </head>
 
 <body onload='HF.init(initBundle);'>
