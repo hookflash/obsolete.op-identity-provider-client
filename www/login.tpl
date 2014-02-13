@@ -78,7 +78,8 @@ either expressed or implied, of the FreeBSD Project.
             displayName: "signUpDisplayName"
         },
         pinClick: "pinClick",
-        ignoreBase: {{ config.IGNORE_BASE }}
+        ignoreBase: {{ config.IGNORE_BASE }},
+        hideFederated: {{ config.HIDE_FEDERATED }}
     };
 
     $(document).ready(function() {

@@ -310,6 +310,9 @@ either expressed or implied, of the FreeBSD Project.
                 name.push("social-facebook");
             }
             name.forEach(function(name) {
+                if (name === "federated-login" && initData.hideFederated) {
+                    return;
+                }
                 if (name === "loading") {
                     $("#op-spinner").removeClass("op-hidden");
                 } else {
