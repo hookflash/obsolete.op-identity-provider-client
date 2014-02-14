@@ -46,6 +46,7 @@ either expressed or implied, of the FreeBSD Project.
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/jquery/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/ajaxfileupload.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/base64.js"></script>
+<script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/q.js"></script>
 <!--
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/cifre/aes.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/cifre/utils.js"></script>
@@ -60,41 +61,38 @@ either expressed or implied, of the FreeBSD Project.
     window.__LOGGER.setChannel("identity-provider-js-all");
 
     var HF = new HF_LoginAPI();
-    var initBundle = {
-        identityServiceAuthenticationURL: "{{ config.SESSION_identityServiceAuthenticationURL }}",
-        // TODO: Don't use `document.domain` here. Should use config variable instead.
-        $identityProvider: document.domain,
-        passwordServer1: "{{ config.HF_PASSWORD1_BASEURI }}",
-        passwordServer2: "{{ config.HF_PASSWORD2_BASEURI }}",
-        login: {
-            click: "loginClick",
-            id: "loginId",
-            password: "loginPassword"
-        },
-        signup: {   
-            click: "signupClick",
-            id: "signUpId",
-            password: "signUpPassword",
-            displayName: "signUpDisplayName"
-        },
-        pinClick: "pinClick",
-        ignoreBase: {{ config.IGNORE_BASE }},
-        hideFederated: {{ config.HIDE_FEDERATED }}
-    };
 
     $(document).ready(function() {
+        
         if (/dev=true/.test(window.location.search)) {
-            $("HEAD").append('<link rel="stylesheet" href="style-dev.css"/>');
+            $("HEAD").append('<link rel="stylesheet" href="{{ config.ASSET_PATH }}style-dev.css"/>');
             $("BODY").prepend('<div class="op-view-label">' + window.location.pathname + '</div>');
         }
+
+        HF.init({
+            identityServiceAuthenticationURL: "{{ config.SESSION_identityServiceAuthenticationURL }}",
+            // TODO: Don't use `document.domain` here. Should use config variable instead.
+            $identityProvider: document.domain,
+            passwordServer1: "{{ config.HF_PASSWORD1_BASEURI }}",
+            passwordServer2: "{{ config.HF_PASSWORD2_BASEURI }}",
+            login: {
+                click: "loginClick",
+                id: "loginId",
+                password: "loginPassword"
+            },
+            signup: {   
+                click: "signupClick",
+                id: "signUpId",
+                password: "signUpPassword",
+                displayName: "signUpDisplayName"
+            },
+            pinClick: "pinClick",
+            ignoreBase: {{ config.IGNORE_BASE }},
+            hideFederated: {{ config.HIDE_FEDERATED }}
+        });        
     });
 
-</script>
-
-<script type="text/javascript">
-    window.addEventListener("message", handleTestUiAutomation, false);
-
-    function handleTestUiAutomation(event) {
+    window.addEventListener("message", function (event) {
         try {
             var message = JSON.parse(event.data);
             var regInfo = message._test_register;
@@ -110,7 +108,7 @@ either expressed or implied, of the FreeBSD Project.
             console.error('test-ui-login-error', e.message);
             throw e;
         }
-    }
+    }, false);
 
     function doRegister(name, username, password) {
         HF.showView('federated-signup');
@@ -129,7 +127,7 @@ either expressed or implied, of the FreeBSD Project.
 </script>
 </head>
 
-<body onload='HF.init(initBundle);'>
+<body>
     <div class="op-centered">
         <div id="op-logo"></div>
         <div id="op-spinner"></div>
@@ -168,7 +166,7 @@ either expressed or implied, of the FreeBSD Project.
 
         <div id="op-social-facebook-view" class="op-hidden">
             <div class="op-view">
-                <button id="op-social-facebook-button"><img src="images/iPhone_signin_facebook@2x.png"></button>
+                <button id="op-social-facebook-button"><img src="{{ config.ASSET_PATH }}images/iPhone_signin_facebook@2x.png"></button>
             </div>
         </div>
 

@@ -59,6 +59,8 @@ either expressed or implied, of the FreeBSD Project.
 
         log("##### INIT #####", window.location.href);
 
+        var ready = Q.defer();
+
         var _version = '0.1';                   // The current version
 
         var identity = {};                      // identity
@@ -111,11 +113,13 @@ either expressed or implied, of the FreeBSD Project.
 
                     identityAccessWindowNotify(true, false);
                 }
+                ready.resolve();
             } catch (err) {
                 if (!$appid) {
                     window.__LOGGER.setChannel("identity-provider-js-all");
                 }
                 log("ERROR", "init", err.message, err.stack);
+                ready.reject(err);
             }
         };
         
@@ -127,57 +131,63 @@ either expressed or implied, of the FreeBSD Project.
             try {
                 var data = JSON.parse(message.data);
 
-                log("window.onmessage", "data", data);
+                // Wait for `init()` to run before we process messages.
+                Q.when(ready.promise).then(function() {
 
-                if (data.notify) {
+                    log("window.onmessage", "data", data);
 
-                    $appid = data.notify.$appid;
-                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
+                    if (data.notify) {
 
-                    if (data.notify.$method == "identity-access-start") {
-                        // start login/sign up procedure
-                        identityAccessStart = data.notify;
+                        $appid = data.notify.$appid;
+                        window.__LOGGER.setChannel("identity-provider-js-" + $appid);
 
-                        log("window.onmessage", "identityAccessStart", identityAccessStart);
+                        if (data.notify.$method == "identity-access-start") {
+                            // start login/sign up procedure
+                            identityAccessStart = data.notify;
 
-                        if (identityAccessStart.identity.reloginKey !== undefined) {
-                            //relogin
-                            startRelogin();
-                        } else {
-                            startLogin();
+                            log("window.onmessage", "identityAccessStart", identityAccessStart);
+
+                            if (identityAccessStart.identity.reloginKey !== undefined) {
+                                //relogin
+                                startRelogin();
+                            } else {
+                                startLogin();
+                            }
                         }
-                    }
-                } else
-                if (data.result) {
-
-                    $appid = data.result.$appid;
-                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
-
-                    if (data.result.$method == 'identity-access-window') {
-
-                        log("window.onmessage", "identity", identity);
-                        log("window.onmessage", "waitForNotifyResponseId", waitForNotifyResponseId);
-
-                        if (
-                            data.result.$id === waitForNotifyResponseId &&
-                            identity.redirectURL
-                        ) {
-                            return redirectToURL(identity.redirectURL);
-                        }
-                    }
-                } else
-                if (data.request) {
-
-                    $appid = data.request.$appid;
-                    window.__LOGGER.setChannel("identity-provider-js-" + $appid);
-
-                    if (data.request.$method === "identity-access-lockbox-update") {
-                        identityAccessLockboxUpdate(data);
                     } else
-                    if (data.request.$method === "identity-access-rolodex-credentials-get") {
-                        identityAccessRolodexCredentialsGet(data);
+                    if (data.result) {
+
+                        $appid = data.result.$appid;
+                        window.__LOGGER.setChannel("identity-provider-js-" + $appid);
+
+                        if (data.result.$method == 'identity-access-window') {
+
+                            log("window.onmessage", "identity", identity);
+                            log("window.onmessage", "waitForNotifyResponseId", waitForNotifyResponseId);
+
+                            if (
+                                data.result.$id === waitForNotifyResponseId &&
+                                identity.redirectURL
+                            ) {
+                                return redirectToURL(identity.redirectURL);
+                            }
+                        }
+                    } else
+                    if (data.request) {
+
+                        $appid = data.request.$appid;
+                        window.__LOGGER.setChannel("identity-provider-js-" + $appid);
+
+                        if (data.request.$method === "identity-access-lockbox-update") {
+                            identityAccessLockboxUpdate(data);
+                        } else
+                        if (data.request.$method === "identity-access-rolodex-credentials-get") {
+                            identityAccessRolodexCredentialsGet(data);
+                        }
                     }
-                }
+                }).fail(function(err) {
+                    log("ERROR", "window.onmessage", err.message, err.stack);
+                });
             } catch (err) {
                 if (!$appid) {
                     window.__LOGGER.setChannel("identity-provider-js-all");                    
