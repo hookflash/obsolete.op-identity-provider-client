@@ -88,7 +88,7 @@ either expressed or implied, of the FreeBSD Project.
             },
             pinClick: "pinClick",
             ignoreBase: {{ config.IGNORE_BASE }},
-            hideFederated: {{ config.HIDE_FEDERATED }}
+            hideCustom: {{ config.HIDE_CUSTOM }}
         });        
     });
 
@@ -111,18 +111,18 @@ either expressed or implied, of the FreeBSD Project.
     }, false);
 
     function doRegister(name, username, password) {
-        HF.showView('federated-signup');
+        HF.showView('custom-signup');
         $('#signUpDisplayName').val(name);
         $('#signUpId').val(username);
         $('#signUpPassword').val(password);
-        $('#op-federated-signup-button').click()
+        $('#op-custom-signup-button').click()
     }
 
     function doLogin(username, password){
-        HF.showView('federated-login');
+        HF.showView('custom-login');
         $('#loginId').val(username);
         $('#loginPassword').val(password);
-        $('#op-federated-login-button').click();
+        $('#op-custom-login-button').click();
     }
 </script>
 </head>
@@ -131,35 +131,35 @@ either expressed or implied, of the FreeBSD Project.
     <div class="op-centered">
         <div id="op-logo"></div>
         <div id="op-spinner"></div>
-        <div id="op-federated-login-view" class="op-hidden">
+        <div id="op-custom-login-view" class="op-hidden">
             <div class="op-view">
                 <h1>Login</h1>
                 <div class="op-error op-hidden"></div>
                 <div class="op-fieldset"><input type="text" id="loginId" placeholder="username" autocorrect="off" autocapitalize="off"/></div>
                 <div class="op-fieldset"><input type="password" id="loginPassword" placeholder="password" autocorrect="off" autocapitalize="off"/></div>
                 <div class="op-fieldset">
-                    <button id="op-federated-login-button">Login</button>
-                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('federated-signup');">Sign Up</a></div>
+                    <button id="op-custom-login-button">Login</button>
+                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('custom-signup');">Sign Up</a></div>
                 </div>
             </div>
         </div>
 
-        <div id="op-federated-signup-view" class="op-hidden">
+        <div id="op-custom-signup-view" class="op-hidden">
             <div class="op-view">
                 <h1>Create Account</h1>
 
-                <div class="op-headerlink"><a class="op-headerlink" href="#" onclick="HF.showView('federated-login');">Back</a></div>
+                <div class="op-headerlink"><a class="op-headerlink" href="#" onclick="HF.showView('custom-login');">Back</a></div>
 
                 <div class="op-error op-hidden"></div>
 <!--                
-                <div class="op-fieldset"><label>Avatar</label><input type="file" name="file" id="file" /><button id="op-federated-signup-upload-button">Upload</button></div>
+                <div class="op-fieldset"><label>Avatar</label><input type="file" name="file" id="file" /><button id="op-custom-signup-upload-button">Upload</button></div>
 -->
                 <div class="op-fieldset"><label>Display Name</label><input type="text" id="signUpDisplayName" autocorrect="off" autocapitalize="off"/></div>
                 <div class="op-fieldset"><label>Username</label><input type="text" id="signUpId" autocorrect="off" autocapitalize="off"/></div>
                 <div class="op-fieldset"><label>Password</label><input type="password" id="signUpPassword" autocorrect="off" autocapitalize="off"/></div>
                 <div class="op-fieldset">
-                    <button id="op-federated-signup-button">Sign up</button>
-                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('federated-login');">Log In</a></div>
+                    <button id="op-custom-signup-button">Sign up</button>
+                    <div class="op-fieldset-actions"><a class="op-buttonlink" href="#" onclick="HF.showView('custom-login');">Log In</a></div>
                 </div>
             </div>
         </div>
