@@ -169,15 +169,6 @@ either expressed or implied, of the FreeBSD Project.
                 <button id="op-social-facebook-button"><img src="{{ config.ASSET_PATH }}images/iPhone_signin_facebook@2x.png"></button>
             </div>
         </div>
-
-        <div id="op-pinvalidation-view" class="op-hidden">
-            <div class="op-view">
-                <h1>Enter PIN</h1>
-                <input type="text" size="6" id="pin" autocorrect="off" autocapitalize="off"/>
-                <button onclick="op-pinvalidation-button" >Validate PIN</button>
-                <div id="pinexpired">&nbps;</div>
-            </div>
-        </div>
     </div>
 </body>
 </html>
