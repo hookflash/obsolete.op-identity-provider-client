@@ -88,7 +88,7 @@ either expressed or implied, of the FreeBSD Project.
             },
             pinClick: "pinClick",
             ignoreBase: {{ config.IGNORE_BASE }},
-            hideFederated: {{ config.HIDE_CUSTOM }}
+            hideFederated: {{ config.HIDE_FEDERATED }}
         });        
     });
 
