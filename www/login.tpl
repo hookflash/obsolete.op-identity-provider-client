@@ -37,7 +37,7 @@ either expressed or implied, of the FreeBSD Project.
 <head>
 <title>Example Identity Provider - Login/Sign up</title>
 
-<script type="text/javascript" src="//{{ config.HF_LOGGER_HOST }}/tools/logger/logger.js"></script>
+<script type="text/javascript" src="//logger-v1-rel-dev2-i.hcs.io/tools/logger/logger.js"></script>
 
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/cryptojs/rollups/sha1.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}js/lib/cryptojs/rollups/sha256.js"></script>
@@ -57,7 +57,7 @@ either expressed or implied, of the FreeBSD Project.
 
 <script type="text/javascript">
 
-    window.__LOGGER.setUrl("//{{ config.HF_LOGGER_HOST }}/tools/logger/record");
+    window.__LOGGER.setUrl("//logger-v1-rel-dev2-i.hcs.io/tools/logger/record");
     window.__LOGGER.setChannel("identity-provider-js-all");
 
     var HF = new HF_LoginAPI();
@@ -88,7 +88,7 @@ either expressed or implied, of the FreeBSD Project.
             },
             pinClick: "pinClick",
             ignoreBase: {{ config.IGNORE_BASE }},
-            hideFederated: {{ config.HIDE_FEDERATED }}
+            hideFederated: {{ config.HIDE_CUSTOM }}
         });        
     });
 
