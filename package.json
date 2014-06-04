@@ -5,5 +5,11 @@
     "pm": "npm",
     "dependencies": {
     	"opjs-primitives": "~0.1.0"
-    }
+    },
+	"config": {
+		"pio.deploy.converter": {
+			"sourcePath": ".",
+			"scriptsPath": "scripts/digitalocean"
+		}
+	}
 }
