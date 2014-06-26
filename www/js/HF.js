@@ -104,9 +104,9 @@ either expressed or implied, of the FreeBSD Project.
                 // reload scenario
                 if (initData.identityServiceAuthenticationURL) {
 
-                    log("##### Finish oAuth #####", window.location.href);
+                    log("##### Finish Social #####", window.location.href);
 
-                    finishOAuthScenario(initData.identityServiceAuthenticationURL);
+                    finishSocialScenario(initData.identityServiceAuthenticationURL);
                 } else {
 
                     log("##### Signal Init #####", window.location.href);
@@ -295,13 +295,13 @@ either expressed or implied, of the FreeBSD Project.
                     identity.type === "linkedin" ||
                     identity.type === "twitter"
                 ) {
-                    startLoginOauth();
+                    startLoginSocial();
                 } else
                 if (initData.ignoreBase) {
                     startLoginChoose();
                 } else
-                if (identity.type === "federated") {
-                    startLoginFederated();
+                if (identity.type === "custom") {
+                    startLoginCustom();
                 } else {
                     throw new Error("Don't know how to proceed!");
                 }
@@ -316,11 +316,11 @@ either expressed or implied, of the FreeBSD Project.
             if (!Array.isArray(name)) {
                 name = [ name ];
             }
-            if (name.indexOf("federated-login") !== -1 && initData.ignoreBase) {
+            if (name.indexOf("custom-login") !== -1 && initData.ignoreBase) {
                 name.push("social-facebook");
             }
             name.forEach(function(name) {
-                if (name === "federated-login" && initData.hideFederated) {
+                if (name === "custom-login" && initData.hideCustom) {
                     return;
                 }
                 if (name === "loading") {
@@ -348,10 +348,10 @@ either expressed or implied, of the FreeBSD Project.
                 identity.uri = identityAccessStart.identity.uri;
 
                 showView("loading");
-                startLoginOauth();
+                startLoginSocial();
 
             } else {
-                startLoginFederated();
+                startLoginCustom();
 
                 $("#op-social-facebook-button").click(function() {
                     log("startLoginChoose clicked social-facebook button");
@@ -359,7 +359,7 @@ either expressed or implied, of the FreeBSD Project.
                     identity.uri = "identity://facebook/";
                     identity.identifier = "";
                     showView("loading");
-                    startLoginOauth();
+                    startLoginSocial();
                 });
             }
         }
@@ -414,7 +414,7 @@ either expressed or implied, of the FreeBSD Project.
                         + "/linkedin.com/";
             } else
             if (id.startsWith("identity://" + $identityProviderDomain)) {
-                identity.type = "federated";
+                identity.type = "custom";
                 identity.uri = "identity://" + $identityProviderDomain + "/";
                 identity.identifier = id.split($identityProviderDomain + "/")[1];
             } else
@@ -430,12 +430,12 @@ either expressed or implied, of the FreeBSD Project.
             }
         };
 
-        var startLoginFederated = function() {
-            log("startLoginFederated");
+        var startLoginCustom = function() {
+            log("startLoginCustom");
 
             function showLoginError(message) {
-                showView("federated-login");
-                var elm = $("#op-federated-login-view DIV.op-error");
+                showView("custom-login");
+                var elm = $("#op-custom-login-view DIV.op-error");
                 elm.html(message);
                 elm.removeClass("op-hidden");                
                 setTimeout(function() {
@@ -445,8 +445,8 @@ either expressed or implied, of the FreeBSD Project.
             }
 
             function showSignupError(message) {
-                showView("federated-signup");
-                var elm = $("#op-federated-signup-view DIV.op-error");
+                showView("custom-signup");
+                var elm = $("#op-custom-signup-view DIV.op-error");
                 elm.html(message);
                 elm.removeClass("op-hidden");
                 setTimeout(function() {
@@ -456,9 +456,9 @@ either expressed or implied, of the FreeBSD Project.
             }
 
 
-            showView("federated-login");
+            showView("custom-login");
 
-            $("#op-federated-signup-button").click(function() {
+            $("#op-custom-signup-button").click(function() {
                 log("user signup clicked");
 
                 // read data from input fields
@@ -534,7 +534,7 @@ either expressed or implied, of the FreeBSD Project.
                                         showSignupError(result.error.reason.message);
                                     }
                                 } else {
-                                    getServerNonce(loginFederated);
+                                    getServerNonce(loginCustom);
                                 }
                             } catch(err) {
                                 log("ERROR", "signup", err.message, err.stack);
@@ -550,7 +550,7 @@ either expressed or implied, of the FreeBSD Project.
                 });
             });
             // signup upload avatar image handler
-            $("#op-federated-signup-upload-button").click(function() {
+            $("#op-custom-signup-upload-button").click(function() {
                 log("user uploading avatar");
                 // validate response from avatar upload request.
                 function validateResponseUploadSuccess(data) {
@@ -590,7 +590,7 @@ either expressed or implied, of the FreeBSD Project.
                 });
             });
             // login
-            $("#op-federated-login-button").click(function() {
+            $("#op-custom-login-button").click(function() {
                 log("user login clicked");
                 // read data from input fields
                 identity.identifier = $("#" + initData.login.id).val().toLowerCase();
@@ -611,8 +611,8 @@ either expressed or implied, of the FreeBSD Project.
 
                 getIdentitySalts(function() {
                     getServerNonce(function() {
-                        loginFederated(function(err) {
-                            log("loginFederated", "callback", err);
+                        loginCustom(function(err) {
+                            log("loginCustom", "callback", err);
                             if (err) {
                                 if (err.code === 403) {
                                     showLoginError("Incorrect login!");
@@ -746,8 +746,8 @@ either expressed or implied, of the FreeBSD Project.
             }
         };
         
-        var loginFederated = function(loginResponseCallback) {
-            log("loginFederated", loginResponseCallback);
+        var loginCustom = function(loginResponseCallback) {
+            log("loginCustom", loginResponseCallback);
             identity.passwordStretched = generatePasswordStretched(identity.identifier, 
                     identity.password, 
                     identity.serverPasswordSalt);
@@ -778,8 +778,8 @@ either expressed or implied, of the FreeBSD Project.
             }, loginResponseCallback);
         };
 
-        var startLoginOauth = function(){
-            log("startLoginOauth");
+        var startLoginSocial = function(){
+            log("startLoginSocial");
             identity.clientAuthenticationToken = generateClientAuthenticationToken(
                 generateId(), 
                 generateId(),
@@ -791,7 +791,7 @@ either expressed or implied, of the FreeBSD Project.
                     "$appid": $appid!==undefined ? $appid : '',
                     "$id": generateId(),
                     "$handler": "identity-provider",
-                    "$method": "oauth-provider-authentication",
+                    "$method": "social-provider-authentication",
                     "clientAuthenticationToken": identity.clientAuthenticationToken,
                     "callbackURL": identityAccessStart.browser.outerFrameURL,
                     "identity": {
@@ -807,30 +807,30 @@ either expressed or implied, of the FreeBSD Project.
                 // callback handler that will be called on success
                 success : function(response, textStatus, jqXHR) {
                     // log a message to the console
-                    log("DEBUG", "loginOAuth - on success");
+                    log("DEBUG", "loginSocial - on success");
                     // handle response
-                    if (validateOauthProviderAuthentication(response)) {
+                    if (validateSocialProviderAuthentication(response)) {
                         log("identity", identity);
                         redirectParentOnIdentityAccessWindowResponse();
                     } else {
-                        log("ERROR", "loginOAuth - validation error");
+                        log("ERROR", "loginSocial - validation error");
                     }
                 },
                 // callback handler that will be called on error
                 error : function(jqXHR, textStatus, errorThrown) {
                     // log the error to the console
-                    log("ERROR", "loginOAuth - on error" + textStatus);
+                    log("ERROR", "loginSocial - on error" + textStatus);
                 }
             });
             
-            // loginOAuthStartScenario callback.
-            function validateOauthProviderAuthentication(response) {
+            // loginSocialStartScenario callback.
+            function validateSocialProviderAuthentication(response) {
                 try {
-                    log("DEBUG", "validateOauthProviderAuthentication - response", response);
+                    log("DEBUG", "validateSocialProviderAuthentication - response", response);
                     var responseJSON = JSON.parse(response);
-                    log("DEBUG", "validateOauthProviderAuthentication - responseJSON", responseJSON);
+                    log("DEBUG", "validateSocialProviderAuthentication - responseJSON", responseJSON);
                     var redirectURL = responseJSON.result.providerRedirectURL;
-                    log("DEBUG", "validateOauthProviderAuthentication - redirectURL", redirectURL);
+                    log("DEBUG", "validateSocialProviderAuthentication - redirectURL", redirectURL);
                     if (redirectURL){
                         identity.redirectURL = redirectURL;
                         return true;
@@ -928,29 +928,29 @@ either expressed or implied, of the FreeBSD Project.
             }
         };
                 
-        var finishOAuthScenario = function(url) {
+        var finishSocialScenario = function(url) {
             try {
-                log("finishOAuthScenario", url);
+                log("finishSocialScenario", url);
                 // remove domain
                 var params = url.split("?").pop();
                 params = params.split("&").pop();
-//                log("finishOAuthScenario", "params 1", params);
+//                log("finishSocialScenario", "params 1", params);
                 // facebook fix (remove #...)
                 params = params.split("#")[0];
-//                log("finishOAuthScenario", "params 2", params);
+//                log("finishSocialScenario", "params 2", params);
                 params = decodeURIComponent(params);
 
                 // HACK fix for:
-                // `["finishOAuthScenario","params 3 - to be JSON parsed","{\"reason\":{\"error\":\"Sign+in+failed+due+to+missing+parameter+values\"}}{\"result\":{\"loginState\":\"OAuthAuthenticationSucceeded\",\"identity\":{\"type\":\"facebook\",\"identifier\":\"100084075\"},\"serverAuthenticationToken\":\"3994743e949e5b7f2fcd4c0782135192568e5d6\"}}"]`
+                // `["finishSocialScenario","params 3 - to be JSON parsed","{\"reason\":{\"error\":\"Sign+in+failed+due+to+missing+parameter+values\"}}{\"result\":{\"loginState\":\"SocialAuthenticationSucceeded\",\"identity\":{\"type\":\"facebook\",\"identifier\":\"100084075\"},\"serverAuthenticationToken\":\"3994743e949e5b7f2fcd4c0782135192568e5d6\"}}"]`
                 var doubleJsonIndex = params.indexOf("}{");
                 if (doubleJsonIndex > 0) {
                     params = params.substring(doubleJsonIndex + 1);
                 }
 
-                log("finishOAuthScenario", "params 3 - to be JSON parsed", params);
+                log("finishSocialScenario", "params 3 - to be JSON parsed", params);
                 var paramsJSON = JSON.parse(params);
 
-                log("finishOAuthScenario", "paramsJSON", paramsJSON);
+                log("finishSocialScenario", "paramsJSON", paramsJSON);
 
                 log("get localStorage", {
                     clientAuthenticationToken: localStorage.clientAuthenticationToken,
@@ -960,7 +960,7 @@ either expressed or implied, of the FreeBSD Project.
                 $appid = localStorage.$appid;
                 if (!$appid) {
                     window.__LOGGER.setChannel("identity-provider-js-all");
-                    log("finishOAuthScenario", "$appid", $appid);
+                    log("finishSocialScenario", "$appid", $appid);
                 } else {
                     window.__LOGGER.setChannel("identity-provider-js-" + $appid);
                 }
@@ -971,7 +971,7 @@ either expressed or implied, of the FreeBSD Project.
                 identity.type = paramsJSON.result.identity.type;
                 identity.identifier = paramsJSON.result.identity.identifier;
 
-                log("finishOAuthScenario", "identity", identity);
+                log("finishSocialScenario", "identity", identity);
 
                 return login({
                     "request": {
@@ -994,7 +994,7 @@ either expressed or implied, of the FreeBSD Project.
                 if (!$appid) {
                     window.__LOGGER.setChannel("identity-provider-js-all");
                 }
-                log("ERROR", "finishOAuthScenario", err.message, err.stack);
+                log("ERROR", "finishSocialScenario", err.message, err.stack);
             }
         };
 
@@ -1029,7 +1029,7 @@ either expressed or implied, of the FreeBSD Project.
                         } else
                         if (loginResponseJSON.result.loginState === "Succeeded") {
                             // login is valid
-                            // OAuth
+                            // Social
                             if (
                                 identity.type == "facebook" ||
                                 identity.type == "twitter" ||
@@ -1070,7 +1070,7 @@ either expressed or implied, of the FreeBSD Project.
             var uri = null;
             if (type === 'facebook'){
                 uri = "identity://facebook.com/" + identifier;
-            } else if (type == 'federated'){
+            } else if (type == 'custom'){
                 uri = "identity://" + $identityProviderDomain + '/' + identifier;
             }
             uri.toLowerCase();

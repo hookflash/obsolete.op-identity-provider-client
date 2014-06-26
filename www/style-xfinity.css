@@ -13,11 +13,11 @@ DIV#op-spinner {
     margin-top: 50px;
 }
 
-DIV#op-federated-login-view H1 {
+DIV#op-custom-login-view H1 {
 	display: none;
 }
 
-DIV#op-federated-signup-view H1 {
+DIV#op-custom-signup-view H1 {
 	display: none;
 }
 

@@ -114,16 +114,16 @@ A.op-buttonlink {
 }
 
 
-#op-federated-login-view {
+#op-custom-login-view {
     margin-top: 70px;
     margin-bottom: 20px;
 }
 
-#op-federated-login-view DIV.op-fieldset {
+#op-custom-login-view DIV.op-fieldset {
     display: inline-block;
 }
 
-#op-federated-signup-view {
+#op-custom-signup-view {
     margin-top: 40px;
     margin-bottom: 20px;
 }
