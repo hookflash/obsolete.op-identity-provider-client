@@ -99,7 +99,7 @@ either expressed or implied, of the FreeBSD Project.
                 log("INFO", "init bundle", initData);
 
                 // Buffer logging calls until we have an `$appid` available.
-                window.__LOGGER.setChannel(false);
+//                window.__LOGGER.setChannel(false);
 
                 // reload scenario
                 if (initData.identityServiceAuthenticationURL) {
