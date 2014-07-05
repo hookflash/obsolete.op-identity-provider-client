@@ -220,12 +220,12 @@ Client.prototype.storeSession = function (session) {
     var self = this;
     log("Client->storeSession(session)", session);
     self.session = session;
-    localStorage["opid-session"] = JSON.stringify(session);
+    window.localStorage["opid-session"] = JSON.stringify(session);
 }
 Client.prototype.loadSession = function () {
     var self = this;
     log("Client->loadSession()");
-    self.session = localStorage["opid-session"] || null;
+    self.session = window.localStorage["opid-session"] || null;
     if (self.session) {
         try {
             self.session = JSON.parse(self.session);
@@ -358,7 +358,7 @@ Client.prototype.proceedWithLogin = function () {
         "callbackURL": callbackURL,
         "identity": {
             "type": self.session.authType,
-            "base": "identity://" + self.session.$domain + "/"
+            "base": "identity://" + self.session.requested.identity.provider + "/"
         }
     }, function (err, result) {
         if (err) throw err;
@@ -395,7 +395,7 @@ Client.prototype.proceedAfterLogin = function () {
         },
         "identity": {
             "type": self.session.authType,
-            "base": "identity://" + self.session.$domain + "/"
+            "base": "identity://" + self.session.requested.identity.provider + "/"
         }
     }, function (err, result) {
         if (err) throw err;
@@ -476,7 +476,7 @@ Client.prototype.sendAccessComplete = function() {
             "accessSecret": self.session.login.identity.accessSecret,
             "accessSecretExpires": self.session.login.identity.accessSecretExpires,                            
             "uri": self.session.login.identity.uri,
-            "provider": self.session.$domain,
+            "provider": self.session.requested.identity.provider,
             "reloginKey": self.session.reloginKey
         }
     };
