@@ -9,10 +9,17 @@
         return (Math.floor(Math.random() * 1000000) + 1 + "");
     }
 
+    var logInstance = generateId().substring(0, 2);
+    var logIndex = 0;
     function log() {
-        console.log(arguments);
+        logIndex += 1;
+        if (console) {
+            console.log(arguments);
+        }
         if (window.__LOGGER) {
-            return window.__LOGGER.log.apply(null, arguments);
+            var args = Array.prototype.slice.call(arguments, 0);
+            args.unshift("i:" + logInstance + ":" + logIndex);
+            return window.__LOGGER.log.apply(null, args);
         } else {
 //            console.log(arguments);
         }
@@ -115,18 +122,22 @@ Client.prototype.init = function (window) {
                             self.ready = true;
                             log("Client->init() - self.session", self.session);
                             if (self.session) {
+
+                                log("Client->init() - continue after reload with current session status:", self.session.status);
+
                                 if (self.session.status === "requested") {
                                     return self.proceedWithLogin();
                                 } else
                                 if (self.session.status === "proceeding") {                                    
                                     return self.proceedAfterLogin();
-                                } else
-                                if (self.session.status === "loggedin") {
-                                    return self.sendAccessComplete();
+//                                } else
+//                                if (self.session.status === "loggedin") {
+//                                    return self.sendAccessComplete();
                                 }
                             }
                             // Nothing to do until we get a 'identity-access-start' message
                             // which will set 'self.session' and keep it in local storage across reloads.
+                            log("Client->init() - WARNING: IGNORING REQUEST", data.result);
                             return;
                         }
                     } else {
@@ -162,6 +173,13 @@ Client.prototype.init = function (window) {
 
     log("Client->init() - self.session", self.session);
 
+    // If we are loading page for new login session we reset any existing status if present.
+    if (!/reload=true/.test(window.location.search) && self.session && self.session.status) {
+        log("Client->init() - Reset session because reload != true");
+        self.storeSession(null);
+        return self.redirect(window.location.href);
+    }
+
     return self.sendAccessWindow(false);
 }
 Client.prototype.redirect = function (url, top) {
@@ -182,7 +200,7 @@ Client.prototype.callServer = function (request, callback) {
     var self = this;
     log("Client->callServer(request)", request);
     return $.ajax({
-        url : "/api.php",
+        url : "/" + request.$method,
         type : "POST",
         data : JSON.stringify({
             "request": request
@@ -263,6 +281,43 @@ Client.prototype.handleAccessReset = function (message) {
     self.storeSession(null);
     return self.redirect(message.browser.outerFrameURL, true);
 }
+
+Client.prototype._verifyWindowVisibility = function () {
+    var self = this;
+    log("Client->_verifyWindowVisibility()");
+    if (self.session.required.browser.visibility) {
+        if (!self.visible) {
+            if (self.session.requested.browser.visibility === "visible") {
+                // We can proceeed as browser is already visible.
+                self.visible = true;
+            } else
+            if (self.session.requested.browser.visibility === "hidden") {
+                throw new Error("Trying to login with method that requires login window to be shown but app is stating that 'browser.visibility = hidden'");
+            } else
+            if (self.session.requested.browser.visibility === "visible-on-demand") {
+                self.sendAccessWindow(true);
+                return true;
+            }
+        }
+    } else {
+        if (self.visible) {
+            if (
+                self.session.requested.browser.visibility === "hidden" ||
+                self.session.requested.browser.visibility === "visible-on-demand"
+            ) {
+                // We can proceeed as browser is already hidden.
+                self.visible = false;
+            } else
+            if (self.session.requested.browser.visibility === "visible") {
+                self.sendAccessWindow(false);
+                return true;
+            }
+        }
+    }
+    log("Client->_verifyWindowVisibility() - no redirect");
+    return false;
+}
+
 // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
 Client.prototype.handleAccessStart = function (message) {
     var self = this;
@@ -289,7 +344,7 @@ Client.prototype.handleAccessStart = function (message) {
         required: {
             browser: {
                 // Browser must be visible for user to login
-                visibility: true,
+                visibility: !(typeof message.identity.reloginKey === "string"),
                 // Login process must happen in top window
                 top: true
             }
@@ -299,34 +354,21 @@ Client.prototype.handleAccessStart = function (message) {
 
     self.storeSession(session);
 
-    if (session.required.browser.visibility) {
-        if (!self.visible) {
-            if (session.requested.browser.visibility === "visible") {
-                // We can proceeed as browser is already visible.
-                self.visible = true;
-            } else
-            if (session.requested.browser.visibility === "hidden") {
-                throw new Error("Trying to login with method that requires login window to be shown but app is stating that 'browser.visibility = hidden'");
-            } else
-            if (session.requested.browser.visibility === "visible-on-demand") {
-                return self.sendAccessWindow(true);
-            }
-        }
-    } else {
-        if (self.visible) {
-            if (
-                session.requested.browser.visibility === "hidden" ||
-                session.requested.browser.visibility === "visible-on-demand"
-            ) {
-                // We can proceeed as browser is already hidden.
-                self.visible = false;
-            } else
-            if (session.requested.browser.visibility === "visible") {
-                return self.sendAccessWindow(false);
-            }
-        }
+    if (self._verifyWindowVisibility()) {
+        return;
     }
 
+    return self.proceedWithLogin();
+}
+Client.prototype.forceFreshLogin = function () {
+    // NOTE: We reconstruct the session object the way it would be after handleAccessStart() without a reloginKey.
+    self.session.status = "requested";
+    self.session.required.browser.visibility = true;
+    delete self.session.requested.identity.reloginKey;
+    self.storeSession(session);
+    if (self._verifyWindowVisibility()) {
+        return;
+    }
     return self.proceedWithLogin();
 }
 Client.prototype.proceedWithLogin = function () {
@@ -338,6 +380,9 @@ Client.prototype.proceedWithLogin = function () {
     if (self.session.status !== "requested") {
         throw new Error("Session status must be set to 'requested'");
     }
+
+    delete self.session.status;
+    self.storeSession(self.session);
 
     var top = false;
     var callbackURL = null;
@@ -358,22 +403,50 @@ Client.prototype.proceedWithLogin = function () {
         "callbackURL": callbackURL,
         "identity": {
             "type": self.session.authType,
-            "base": "identity://" + self.session.requested.identity.provider + "/"
+            "base": "identity://" + self.session.requested.identity.provider + "/",
+            "reloginKey": self.session.requested.identity.reloginKey || null
         }
     }, function (err, result) {
         if (err) throw err;
 
-        ASSERT.equal(typeof result.providerRedirectURL, "string", "'result.providerRedirectURL' must be set!");
-        ASSERT.equal(typeof result.serverAuthenticationToken, "string", "'result.serverAuthenticationToken' must be set!");
+        try {
 
-        self.session.status = "proceeding";
-        self.session.serverAuthenticationToken = result.serverAuthenticationToken;
+            ASSERT.equal(typeof result.serverAuthenticationToken, "string", "'result.serverAuthenticationToken' must be set!");
 
-        self.storeSession(self.session);
+            self.session.serverAuthenticationToken = result.serverAuthenticationToken;
 
-        return self.redirect(result.providerRedirectURL, top);
+            if (result.providerRedirectURL) {
+
+                log("Client->proceedWithLogin() - got redirect URL", self.session);
+
+                delete self.session.requested.identity.reloginKey;
+                self.session.status = "requested";
+                self.session.required.browser.visibility = true;
+                self.storeSession(self.session);
+
+                if (self._verifyWindowVisibility()) {
+                    log("Client->proceedWithLogin() - stop after redirect due to browser not visible");
+                    return;
+                }
+
+                self.session.status = "proceeding";
+                self.storeSession(self.session);
+
+                return self.redirect(result.providerRedirectURL, top);
+            } else {
+
+                self.session.status = "proceeding";
+                self.storeSession(self.session);
+
+                return self.proceedAfterLogin();
+            }
+        } catch(err) {
+            log("Client->proceedWithLogin() - error: " + err.stack);
+            throw err;
+        }
     });
 }
+// TODO: Combine with 'Client.prototype.proceedWithLogin'?
 Client.prototype.proceedAfterLogin = function () {
     var self = this;
     log("Client->proceedAfterLogin()");
@@ -383,6 +456,10 @@ Client.prototype.proceedAfterLogin = function () {
     if (self.session.status !== "proceeding") {
         throw new Error("Session status must be set to 'proceeding'");
     }
+
+    delete self.session.status;
+    self.storeSession(self.session);
+
     return self.callServer({
         "$domain": self.session.$domain,
         "$appid": self.session.$appid,
@@ -400,9 +477,24 @@ Client.prototype.proceedAfterLogin = function () {
     }, function (err, result) {
         if (err) throw err;
 
+        if (result.error) {
+            if (result.error.$id === 403) {
+
+                // Looks like our relogin token is not working.
+                // So we start a fresh login session.
+
+                log("Client->proceedAfterLogin() - cannot login - forcing fresh login");
+
+                return self.forceFreshLogin();
+            }
+        }
+
         ASSERT.equal(typeof result.identity.accessToken, "string", "'result.identity.accessToken' must be set!");
         ASSERT.equal(typeof result.identity.accessSecret, "string", "'result.identity.accessSecret' must be set!");
         ASSERT.equal(typeof result.identity.accessSecretExpires, "number", "'result.identity.accessSecretExpires' must be set!");
+
+        // TODO: Generate relogin key on client or add something to it so that part transferred from server is not enough alone to login?
+        ASSERT.equal(typeof result.identity.reloginKey, "string", "'result.identity.reloginKey' must be set!");
 
         self.session.login = {
             identity: result.identity,
@@ -423,18 +515,17 @@ Client.prototype.proceedAfterLogin = function () {
             }
         } else {
 */
+/*
             var reloginKey = self.session.requested.identity.reloginKey || "";
             if (!reloginKey) {
                 // TODO: Generate login key based on password parts.
-                /*
-                if (identity.passwordStretched && identity.reloginEncryptionKey && data.identity.reloginKeyServerPart) {
-                    reloginKey = encrypt(identity.passwordStretched + "--" + data.identity.reloginKeyServerPart, identity.reloginEncryptionKey);
-                }
-                */
+                //if (identity.passwordStretched && identity.reloginEncryptionKey && data.identity.reloginKeyServerPart) {
+                //    reloginKey = encrypt(identity.passwordStretched + "--" + data.identity.reloginKeyServerPart, identity.reloginEncryptionKey);
+                //}
                 // TODO: Remove 'result.identity.reloginKey' from response. [Security]
                 reloginKey = self.session.login.identity.reloginKey;
             }
-
+*/
             var lockboxKey = self.session.login.lockbox.key || null;
             if (lockboxKey) {
                 // TODO: Implement key hashing properly instead of getting key from 'result.identity.accessSecret'. [Security]
@@ -447,7 +538,7 @@ Client.prototype.proceedAfterLogin = function () {
                 */
             }
 
-            self.session.reloginKey = reloginKey;
+            self.session.reloginKey = self.session.login.identity.reloginKey;
             self.session.lockboxKey = lockboxKey;
 
             self.storeSession(self.session);
