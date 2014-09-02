@@ -466,21 +466,39 @@ Client.prototype.proceedWithLogin = function () {
     }
 
     // User must choose type of login!
-    // TODO: Only show configured services.
-    $("#op-service-oauth-view").removeClass("op-hidden");
-    $("#op-service-oauth-view BUTTON").click(function() {
-        self.session.authType = "oauth";
-        self.storeSession(self.session);
-        doLogin();
-        return false;
-    });
-    $("#op-service-facebook-view").removeClass("op-hidden");
-    $("#op-service-facebook-view BUTTON").click(function() {
-        self.session.authType = "facebook";
-        self.storeSession(self.session);
-        doLogin();
-        return false;
-    });
+
+    if (
+        !self.options.configuredServices ||
+        self.options.configuredServices.length === 0
+    ) {
+        $("#op-service-none-view").removeClass("op-hidden");
+    } else {
+        // If only one service is configured we proceed with that login.
+        if (self.options.configuredServices.length === 1) {
+            self.session.authType = self.options.configuredServices[0];
+            self.storeSession(self.session);
+            doLogin();
+        } else {
+            if (self.options.configuredServices.indexOf("oauth") !== -1) {
+                $("#op-service-oauth-view").removeClass("op-hidden");
+                $("#op-service-oauth-view BUTTON").click(function() {
+                    self.session.authType = "oauth";
+                    self.storeSession(self.session);
+                    doLogin();
+                    return false;
+                });
+            }
+            if (self.options.configuredServices.indexOf("facebook") !== -1) {
+                $("#op-service-facebook-view").removeClass("op-hidden");
+                $("#op-service-facebook-view BUTTON").click(function() {
+                    self.session.authType = "facebook";
+                    self.storeSession(self.session);
+                    doLogin();
+                    return false;
+                });
+            }
+        }
+    }
 }
 // TODO: Combine with 'Client.prototype.proceedWithLogin'?
 Client.prototype.proceedAfterLogin = function () {
@@ -704,7 +722,8 @@ Client.prototype.handleAccessRolodexCredentialsGet = function (request) {
 
 
                 var client = new Client({
-                    domain: bundle.$identityProvider
+                    domain: bundle.$identityProvider,
+                    configuredServices: bundle.configuredServices
                 });
                 client.init(window);
 

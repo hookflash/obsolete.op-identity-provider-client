@@ -30,7 +30,8 @@
             // TODO: Don't use `document.domain` here. Should use config variable instead.
             $identityProvider: document.domain,
             passwordServer1: "{{ config.HF_PASSWORD1_BASEURI }}",
-            passwordServer2: "{{ config.HF_PASSWORD2_BASEURI }}"
+            passwordServer2: "{{ config.HF_PASSWORD2_BASEURI }}",
+            configuredServices: {{ config.HF_CONFIGURED_SERVICES }}
         });        
     });
 </script>
@@ -49,6 +50,12 @@
         <div id="op-service-facebook-view" class="op-hidden">
             <div class="op-view">
                 <button id="op-service-facebook-button"><img src="{{ config.ASSET_PATH }}/images/iPhone_signin_facebook@2x.png"></button>
+            </div>
+        </div>
+
+        <div id="op-service-none-view" class="op-hidden">
+            <div class="op-view">
+                Configuration Error: No identity service configured for this identity provider!
             </div>
         </div>
 
