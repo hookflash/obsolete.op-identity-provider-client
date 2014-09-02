@@ -461,9 +461,6 @@ Client.prototype.proceedWithLogin = function () {
 
     $("#op-spinner").addClass("op-hidden");
 
-    if (self.session.authType) {
-        return doLogin();
-    }
 
     // User must choose type of login!
 
@@ -472,12 +469,16 @@ Client.prototype.proceedWithLogin = function () {
         self.options.configuredServices.length === 0
     ) {
         $("#op-service-none-view").removeClass("op-hidden");
+        return;
     } else {
         // If only one service is configured we proceed with that login.
         if (self.options.configuredServices.length === 1) {
             self.session.authType = self.options.configuredServices[0];
             self.storeSession(self.session);
-            doLogin();
+            return doLogin();
+        } else
+        if (self.session.authType) {
+            return doLogin();
         } else {
             if (self.options.configuredServices.indexOf("oauth") !== -1) {
                 $("#op-service-oauth-view").removeClass("op-hidden");
@@ -497,7 +498,9 @@ Client.prototype.proceedWithLogin = function () {
                     return false;
                 });
             }
+            return;
         }
+        return;
     }
 }
 // TODO: Combine with 'Client.prototype.proceedWithLogin'?
