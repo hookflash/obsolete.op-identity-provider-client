@@ -40,9 +40,15 @@
     <div class="op-centered">
         <div id="op-spinner"></div>
 
-        <div id="op-social-oauth-view" class="op-hidden">
+        <div id="op-service-oauth-view" class="op-hidden">
             <div class="op-view">
                 <button id="op-social-oauth-button">Login using configured oAuth server</button>
+            </div>
+        </div>
+
+        <div id="op-service-facebook-view" class="op-hidden">
+            <div class="op-view">
+                <button id="op-service-facebook-button"><img src="{{ config.ASSET_PATH }}/images/iPhone_signin_facebook@2x.png"></button>
             </div>
         </div>
 

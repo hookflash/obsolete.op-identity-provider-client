@@ -85,7 +85,6 @@ DIV.op-view DIV.op-fieldset > DIV.op-fieldset-actions {
 }
 
 DIV.op-view BUTTON {
-    background-image: url(images/buttonbg2.png);
     background-repeat: repeat-x;
     border: 0px;
     border-radius: 4px;
@@ -127,10 +126,10 @@ A.op-buttonlink {
     margin-top: 40px;
     margin-bottom: 20px;
 }
-#op-social-facebook-view {
+#op-service-facebook-view {
     text-align: center;
 }
-#op-social-facebook-button {
+#op-service-facebook-button {
     margin-top: 50px;
     border: 0px;
     padding: 0px;
@@ -139,6 +138,6 @@ A.op-buttonlink {
     background-color: transparent;
 }
 
-#op-social-facebook-button > IMG {
+#op-service-facebook-button > IMG {
     width: 200px;
 }

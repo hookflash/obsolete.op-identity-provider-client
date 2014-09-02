@@ -329,6 +329,18 @@ Client.prototype.handleAccessStart = function (message) {
         return sha1.finalize().toString();
     }
 
+    // TODO: Derive `message.identity.provider` from `message.identity.base` if not set.
+
+    // Determine type of login or let user choose by default.
+    var authType = null;
+    if (message.identity.base) {
+        if (message.identity.base === "identity://facebook.com") {
+            authType = "facebook";
+        } else {
+            authType = "oauth";
+        }
+    }
+
     var session = {
         $domain: message.$domain,
         $appid: message.$appid,
@@ -337,10 +349,7 @@ Client.prototype.handleAccessStart = function (message) {
             browser: message.browser
         },
         authToken: makeAuthToken(),
-        // TODO: Determine type of login to proceed with.
-        //       We can either login right away if using something like oAuth
-        //       or we ask user how they want to login.
-        authType: "oauth",
+        authType: authType,
         required: {
             browser: {
                 // Browser must be visible for user to login
@@ -384,66 +393,93 @@ Client.prototype.proceedWithLogin = function () {
     delete self.session.status;
     self.storeSession(self.session);
 
-    var top = false;
-    var callbackURL = null;
-    if (self.session.required.browser.top && window.top !== window) {
-        top = true;
-        callbackURL = self.session.requested.browser.outerFrameURL;
-    } else {
-        callbackURL = window.location.href;
+
+    function doLogin() {
+        var top = false;
+        var callbackURL = null;
+        if (self.session.required.browser.top && window.top !== window) {
+            top = true;
+            callbackURL = self.session.requested.browser.outerFrameURL;
+        } else {
+            callbackURL = window.location.href;
+        }
+
+        return self.callServer({
+            "$domain": self.session.$domain,
+            "$appid": self.session.$appid,
+            "$id": generateId(),
+            "$handler": "identity-provider",
+            "$method": "oauth-provider-authentication",
+            "clientAuthenticationToken": self.session.authToken,
+            "callbackURL": callbackURL,
+            "identity": {
+                "type": self.session.authType,
+                "base": "identity://" + self.session.requested.identity.provider + "/",
+                "reloginKey": self.session.requested.identity.reloginKey || null
+            }
+        }, function (err, result) {
+            if (err) throw err;
+
+            try {
+
+                ASSERT.equal(typeof result.serverAuthenticationToken, "string", "'result.serverAuthenticationToken' must be set!");
+
+                self.session.serverAuthenticationToken = result.serverAuthenticationToken;
+
+                if (result.providerRedirectURL) {
+
+                    log("Client->proceedWithLogin() - got redirect URL", self.session);
+
+                    delete self.session.requested.identity.reloginKey;
+                    self.session.status = "requested";
+                    self.session.required.browser.visibility = true;
+                    self.storeSession(self.session);
+
+                    if (self._verifyWindowVisibility()) {
+                        log("Client->proceedWithLogin() - stop after redirect due to browser not visible");
+                        return;
+                    }
+
+                    self.session.status = "proceeding";
+                    self.storeSession(self.session);
+
+                    return self.redirect(result.providerRedirectURL, top);
+                } else {
+
+                    self.session.status = "proceeding";
+                    self.storeSession(self.session);
+
+                    return self.proceedAfterLogin();
+                }
+            } catch(err) {
+                log("Client->proceedWithLogin() - error: " + err.stack);
+                throw err;
+            }
+        });
     }
 
-    return self.callServer({
-        "$domain": self.session.$domain,
-        "$appid": self.session.$appid,
-        "$id": generateId(),
-        "$handler": "identity-provider",
-        "$method": "oauth-provider-authentication",
-        "clientAuthenticationToken": self.session.authToken,
-        "callbackURL": callbackURL,
-        "identity": {
-            "type": self.session.authType,
-            "base": "identity://" + self.session.requested.identity.provider + "/",
-            "reloginKey": self.session.requested.identity.reloginKey || null
-        }
-    }, function (err, result) {
-        if (err) throw err;
 
-        try {
+    $("#op-spinner").addClass("op-hidden");
 
-            ASSERT.equal(typeof result.serverAuthenticationToken, "string", "'result.serverAuthenticationToken' must be set!");
+    if (self.session.authType) {
+        return doLogin();
+    }
 
-            self.session.serverAuthenticationToken = result.serverAuthenticationToken;
-
-            if (result.providerRedirectURL) {
-
-                log("Client->proceedWithLogin() - got redirect URL", self.session);
-
-                delete self.session.requested.identity.reloginKey;
-                self.session.status = "requested";
-                self.session.required.browser.visibility = true;
-                self.storeSession(self.session);
-
-                if (self._verifyWindowVisibility()) {
-                    log("Client->proceedWithLogin() - stop after redirect due to browser not visible");
-                    return;
-                }
-
-                self.session.status = "proceeding";
-                self.storeSession(self.session);
-
-                return self.redirect(result.providerRedirectURL, top);
-            } else {
-
-                self.session.status = "proceeding";
-                self.storeSession(self.session);
-
-                return self.proceedAfterLogin();
-            }
-        } catch(err) {
-            log("Client->proceedWithLogin() - error: " + err.stack);
-            throw err;
-        }
+    // User must choose type of login!
+    // TODO: Only show configured services.
+    $("#op-service-oauth-view").removeClass("op-hidden");
+    $("#op-service-oauth-view BUTTON").click(function() {
+        self.session.authType = "oauth";
+        self.storeSession(self.session);
+        doLogin();
+        return false;
+    });
+    $("#op-service-facebook-view").removeClass("op-hidden");
+    $("#op-service-facebook-view BUTTON").click(function() {
+        self.session.authType = "facebook";
+        self.storeSession(self.session);
+        doLogin();
+        return false;
     });
 }
 // TODO: Combine with 'Client.prototype.proceedWithLogin'?
