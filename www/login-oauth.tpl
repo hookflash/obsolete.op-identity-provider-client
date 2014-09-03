@@ -53,6 +53,12 @@
             </div>
         </div>
 
+        <div id="op-service-twitter-view" class="op-hidden">
+            <div class="op-view">
+                <button id="op-service-twitter-button"><img src="{{ config.ASSET_PATH }}/images/sign-in-with-twitter-gray.png"></button>
+            </div>
+        </div>
+
         <div id="op-service-none-view" class="op-hidden">
             <div class="op-view">
                 Configuration Error: No identity service configured for this identity provider!

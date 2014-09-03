@@ -334,8 +334,12 @@ Client.prototype.handleAccessStart = function (message) {
     // Determine type of login or let user choose by default.
     var authType = null;
     if (message.identity.base) {
+        // TODO: Match supported base domains against config instead of hardcoded here.
         if (message.identity.base === "identity://facebook.com") {
             authType = "facebook";
+        } else
+        if (message.identity.base === "identity://twitter.com") {
+            authType = "twitter";
         } else {
             authType = "oauth";
         }
@@ -480,24 +484,15 @@ Client.prototype.proceedWithLogin = function () {
         if (self.session.authType) {
             return doLogin();
         } else {
-            if (self.options.configuredServices.indexOf("oauth") !== -1) {
-                $("#op-service-oauth-view").removeClass("op-hidden");
-                $("#op-service-oauth-view BUTTON").click(function() {
-                    self.session.authType = "oauth";
+            self.options.configuredServices.forEach(function (service) {
+                $("#op-service-" + service + "-view").removeClass("op-hidden");
+                $("#op-service-" + service + "-view BUTTON").click(function() {
+                    self.session.authType = service;
                     self.storeSession(self.session);
                     doLogin();
                     return false;
                 });
-            }
-            if (self.options.configuredServices.indexOf("facebook") !== -1) {
-                $("#op-service-facebook-view").removeClass("op-hidden");
-                $("#op-service-facebook-view BUTTON").click(function() {
-                    self.session.authType = "facebook";
-                    self.storeSession(self.session);
-                    doLogin();
-                    return false;
-                });
-            }
+            });
             return;
         }
         return;
