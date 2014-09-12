@@ -56,7 +56,6 @@
 
 
 
-
 /* VERIFIED */
 var ASSERT = {
     equal: function (actual, expected, message) {
@@ -189,8 +188,10 @@ Client.prototype.redirect = function (url, top) {
         url = window.location.protocol + "//" + window.location.host + url;
     }
     if (top) {
-        log("Client->redirect() - window.top.location", url);
-        window.top.location = url;
+        log("Client->redirect() - window.parent.location", url);
+        window.parent.location = url;
+//        log("Client->redirect() - window.top.location", url);
+//        window.top.location = url;
     } else {
         log("Client->redirect() - window.location", url);
         window.location = url;
