@@ -7,6 +7,8 @@ BODY {
     background-size: cover;
     font-family: Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif;
     font-size: 14px;
+    margin: 0px;
+    padding: 0px;
 }
 
 DIV.op-centered {
@@ -23,7 +25,7 @@ DIV#op-spinner {
     display: inline-block;
     width: 64px;
     height: 64px;
-    margin-top: 100px;
+    margin-top: 10px;
 }
 
 DIV.op-error {
@@ -49,6 +51,7 @@ DIV.op-view {
     display: inline-block;
     width: 250px;
     text-align: center;
+    margin: 10px;
 }
 
 DIV.op-view LABEL {
@@ -85,10 +88,8 @@ DIV.op-view DIV.op-fieldset > DIV.op-fieldset-actions {
 }
 
 DIV.op-view BUTTON {
-    background-repeat: repeat-x;
-    border: 0px;
-    border-radius: 4px;
     font-size: 18px;
+    border-width: 2px;
     cursor: pointer;
     padding: 5px;
     padding-left: 10px;

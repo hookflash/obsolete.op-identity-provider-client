@@ -41,25 +41,25 @@
     <div class="op-centered">
         <div id="op-spinner"></div>
 
-        <div id="op-service-oauth-view" class="op-hidden">
+        <div id="op-service-oauth-view" class="view op-hidden">
             <div class="op-view">
                 <button id="op-social-oauth-button">Login using configured oAuth server</button>
             </div>
         </div>
 
-        <div id="op-service-facebook-view" class="op-hidden">
+        <div id="op-service-facebook-view" class="view op-hidden">
             <div class="op-view">
                 <button id="op-service-facebook-button"><img src="{{ config.ASSET_PATH }}/images/iPhone_signin_facebook@2x.png"></button>
             </div>
         </div>
 
-        <div id="op-service-twitter-view" class="op-hidden">
+        <div id="op-service-twitter-view" class="view op-hidden">
             <div class="op-view">
                 <button id="op-service-twitter-button"><img src="{{ config.ASSET_PATH }}/images/sign-in-with-twitter-gray.png"></button>
             </div>
         </div>
 
-        <div id="op-service-none-view" class="op-hidden">
+        <div id="op-service-none-view" class="view op-hidden">
             <div class="op-view">
                 Configuration Error: No identity service configured for this identity provider!
             </div>

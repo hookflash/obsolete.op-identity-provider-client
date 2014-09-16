@@ -36,7 +36,7 @@
 
     var HF_LoginAPI = window.HF_LoginAPI = function() {
 
-        log("##### INIT #####", window.location.href);
+        log("##### INIT #####", window.location.href, window.name);
 
         var identity = {};                      // identity
         var identityAccessStart;                // identityAccessStart notify
@@ -82,9 +82,25 @@ Client.prototype.init = function (window) {
     self.postObject = function (message) {
         message = JSON.stringify(message, null, 4);
         lastPostedMessage = message;
-        log("window.parent.postMessage", message);
-        // TODO: Only post to parent frame domain.
-        window.parent.postMessage(message, "*");
+        if (
+            window.opener &&
+            typeof window.opener.postMessage === "function"
+        ) {
+            log("window.opener.postMessage", message);
+            // TODO: Only post to specific opener domains.
+            window.opener.postMessage(message, "*");
+        } else
+        if (
+            window.parent &&
+            typeof window.parent.postMessage === "function"
+        ) {
+            log("window.parent.postMessage", message);
+            // TODO: Only post to specific parent frame domains.
+            window.parent.postMessage(message, "*");
+
+        } else {
+            throw new Error("Unable to message parent window!");
+        }
     }
 
     // Global cross-domain message handler.
@@ -98,10 +114,20 @@ Client.prototype.init = function (window) {
                 data = JSON.parse(data);
             }
             if (data.notify) {
-                if (!self.ready) {
-                    throw new Error("Cannot handle '" + data.notify.$handler + ":" + data.notify.$method + "'. 'identity-access-window' result not yet received!");
-                }
                 if (data.notify.$handler == "identity") {
+
+                    if (!self.ready) {
+                        if (data.notify.$method == "identity-access-complete") {
+                            // We are being notified that login was successful in another window.
+                            // So we reload the session and assume we have access to the successful data as well to we set `self.ready` to `true`.
+                            // TODO: Should `self.ready` be set when loading session data within `self.loadSession()`?
+                            self.ready = true;
+                            return self.loadSession();
+                        }
+
+                        throw new Error("Cannot handle '" + data.notify.$handler + ":" + data.notify.$method + "'. 'identity-access-window' result not yet received!");
+                    }
+
                     if (data.notify.$method == "identity-access-reset") {
                         return self.handleAccessReset(data.notify);
                     } else
@@ -173,8 +199,14 @@ Client.prototype.init = function (window) {
     log("Client->init() - self.session", self.session);
 
     // If we are loading page for new login session we reset any existing status if present.
-    if (!/reload=true/.test(window.location.search) && self.session && self.session.status) {
-        log("Client->init() - Reset session because reload != true");
+    // But only if we are not re-initializing in login window (reinit=false).
+    if (
+        self.session &&
+        self.session.status &&
+        !/reload=true/.test(window.location.search) &&
+        !/reinit=false/.test(window.location.search)
+    ) {
+        log("Client->init() - Reset session because: " + window.location.search);
         self.storeSession(null);
         return self.redirect(window.location.href);
     }
@@ -271,7 +303,13 @@ Client.prototype.sendAccessWindow = function (visible) {
             "$method": "identity-access-window",
             "browser": {
                 "ready": true,
-                "visibility": self.visible
+                "visibility": self.visible,
+                "top": (
+                    self.session &&
+                    self.session.required &&
+                    self.session.required.browser &&
+                    self.session.required.browser.top
+                ) || false
             }
         }
     });
@@ -375,6 +413,7 @@ Client.prototype.handleAccessStart = function (message) {
     return self.proceedWithLogin();
 }
 Client.prototype.forceFreshLogin = function () {
+    console.log("forceFreshLogin() - self.session", self.session);
     // NOTE: We reconstruct the session object the way it would be after handleAccessStart() without a reloginKey.
     self.session.status = "requested";
     self.session.required.browser.visibility = true;
@@ -631,6 +670,10 @@ Client.prototype.sendAccessComplete = function() {
             "reset": self.session.login.lockbox.reset || false
         };
     }
+
+    $("DIV.view").addClass("op-hidden");
+    $("#op-spinner").removeClass("op-hidden");
+
     return self.postObject({
         "notify": notify
     });
