@@ -6,15 +6,8 @@
 <link rel="stylesheet" href="{{ config.ASSET_PATH }}/style-oauth.css"/>
 
 <script type="text/javascript" src="//{{ config.HF_LOGGER_HOST }}/tools/logger/logger.js"></script>
-
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/sha1.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/sha256.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/hmac-sha1.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/aes.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/jquery/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/ajaxfileupload.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/base64.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/q.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/HF-oauth.js"></script>
 
 <script type="text/javascript">
@@ -22,15 +15,10 @@
     window.__LOGGER.setUrl("//{{ config.HF_LOGGER_HOST }}/tools/logger/record");
     window.__LOGGER.setChannel("identity-provider-js-all");
 
-    var HF = new HF_LoginAPI();
-
     $(document).ready(function() {
-        HF.init({
-            identityServiceAuthenticationURL: "{{ config.SESSION_identityServiceAuthenticationURL }}",
+        window._HCS_IDENTITY_PROVIDER({
             // TODO: Don't use `document.domain` here. Should use config variable instead.
-            $identityProvider: document.domain,
-            passwordServer1: "{{ config.HF_PASSWORD1_BASEURI }}",
-            passwordServer2: "{{ config.HF_PASSWORD2_BASEURI }}",
+            domain: document.domain,
             configuredServices: {{ config.HF_CONFIGURED_SERVICES }}
         });        
     });
@@ -47,9 +35,15 @@
             </div>
         </div>
 
+        <div id="op-service-facebook_v1-view" class="view op-hidden">
+            <div class="op-view">
+                <button id="op-service-facebook_v1-button"><img src="{{ config.ASSET_PATH }}/images/iPhone_signin_facebook@2x.png"></button>
+            </div>
+        </div>
+
         <div id="op-service-facebook-view" class="view op-hidden">
             <div class="op-view">
-                <button id="op-service-facebook-button"><img src="{{ config.ASSET_PATH }}/images/iPhone_signin_facebook@2x.png"></button>
+                <button id="op-service-facebook-button"><img src="{{ config.ASSET_PATH }}/images/iPhone_signin_facebook@2x.png"> v2</button>
             </div>
         </div>
 
