@@ -347,22 +347,33 @@
             // Determine type of login or let user choose by default.
             var authType = null;
             if (message.identity.base) {
-                // TODO: Match supported base domains against config instead of hardcoded here.
-                if (message.identity.base === "identity://facebook_v1") {
-                    authType = "facebook_v1";
-                } else
-                if (message.identity.base === "identity://facebook.com/") {
-                    authType = "facebook";
-                } else
-                if (message.identity.base === "identity://twitter.com/") {
-                    authType = "twitter";
-                } else {
-                    log("Client->handleAccessStart(message) - authType", authType);
+
+                console.log("Client->handleAccessStart(message) - message.identity", message.identity);
+
+                if (
+                    message.identity.base &&
+                    message.identity.provider
+                ) {
+                    if (message.identity.base === ("identity://" + message.identity.provider + "/")) {
+                        // Let user choose login.
+                        authType = null;
+                    } else
+                    if (message.identity.base === "identity://facebook.com/") {
+                        authType = "facebook_v1";
+                    } else
+                    if (message.identity.base === "identity://twitter.com/") {
+                        authType = "twitter";
+                    } else {
+                        try {
+                            if (message.identity.base === ("identity://" + message.identity.provider.match(/^(.+?)\.identity\./)[1].replace(/-{2}/g, "__DASH__").replace(/-/g, ".").replace(/__DASH__/g, "-") + "/")) {
+                                authType = "oauth";
+                            }
+                        } catch(err) {}
+                    }
                 }
             }
 
-            log("Client->handleAccessStart(message) - could not determine authType from message.identity.base", message.identity.base);
-
+            log("Client->handleAccessStart(message) - authType", authType);
 
             var session = {
                 $domain: message.$domain,
@@ -501,7 +512,7 @@
 
                 // If only one service is configured we proceed with that login.
                 if (self.options.configuredServices.length === 1) {
-                    self.session.authType = self.options.configuredServices[0];
+                    self.session.authType = self.options.configuredServices[0].name;
                     log("Client->proceedWithLogin() - proceed with only configured service:", self.session.authType);
                     self.storeSession(self.session);
                     return doLogin();
@@ -512,9 +523,9 @@
                 } else {
                     log("Client->proceedWithLogin() - let user pick login service");
                     self.options.configuredServices.forEach(function (service) {
-                        $("#op-service-" + service + "-view").removeClass("op-hidden");
-                        $("#op-service-" + service + "-view BUTTON").click(function() {
-                            self.session.authType = service;
+                        $("#op-service-" + service.name + "-view").removeClass("op-hidden");
+                        $("#op-service-" + service.name + "-view BUTTON").click(function() {
+                            self.session.authType = service.name;
                             self.storeSession(self.session);
                             doLogin();
                             return false;
