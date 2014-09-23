@@ -471,7 +471,7 @@
                             self.storeSession(self.session);
 
                             if (self._verifyWindowVisibility()) {
-                                log("Client->proceedWithLogin() - stop after redirect due to browser not visible");
+                                log("Client->proceedWithLogin() - stop before redirect due to browser not visible");
                                 return;
                             }
 
@@ -521,7 +521,7 @@
                     log("Client->proceedWithLogin() - proceed with requested service:", self.session.authType);
                     return doLogin();
                 } else {
-                    log("Client->proceedWithLogin() - let user pick login service");
+                    log("Client->proceedWithLogin() - let user pick login service");                                               
                     self.options.configuredServices.forEach(function (service) {
                         $("#op-service-" + service.name + "-view").removeClass("op-hidden");
                         $("#op-service-" + service.name + "-view BUTTON").click(function() {
@@ -531,6 +531,15 @@
                             return false;
                         });
                     });
+
+                    self.session.status = "requested";
+                    self.session.required.browser.visibility = true;
+                    self.storeSession(self.session);
+
+                    if (self._verifyWindowVisibility()) {
+                        log("Client->proceedWithLogin() - show window so user can pick");
+                        return;
+                    }
                     return;
                 }
                 return;
