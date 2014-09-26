@@ -342,18 +342,28 @@
                 return sha1.finalize().toString();
             }
 
-            // TODO: Derive `message.identity.provider` from `message.identity.base` if not set.
+            console.log("Client->handleAccessStart(message) - message.identity before adjustments", message.identity);
 
             // Determine type of login or let user choose by default.
             var authType = null;
+            if (
+                !message.identity.base &&
+                message.identity.uri
+            ) {
+                message.identity.base = message.identity.uri.replace(/^(identity:\/\/[^\/]+\/).+$/, "$1");
+            }
+
+            if (!message.identity.provider) {
+                message.identity.provider = message.identity.base;
+            }
+
+            console.log("Client->handleAccessStart(message) - message.identity after adjustments", message.identity);
+
             if (message.identity.base) {
-
-                console.log("Client->handleAccessStart(message) - message.identity", message.identity);
-
-                if (
-                    message.identity.base &&
-                    message.identity.provider
-                ) {
+//                if (
+//                    message.identity.base &&
+//                    message.identity.provider
+//                ) {
                     if (message.identity.base === ("identity://" + message.identity.provider + "/")) {
                         // Let user choose login.
                         authType = null;
@@ -370,7 +380,7 @@
                             }
                         } catch(err) {}
                     }
-                }
+//                }
             }
 
             log("Client->handleAccessStart(message) - authType", authType);
@@ -449,7 +459,7 @@
                     "callbackURL": callbackURL,
                     "identity": {
                         "type": self.session.authType,
-                        "base": "identity://" + self.session.requested.identity.provider + "/",
+                        "base": self.session.requested.identity.base,
                         "reloginKey": self.session.requested.identity.reloginKey || null
                     }
                 }, function (err, result) {
@@ -571,7 +581,7 @@
                 },
                 "identity": {
                     "type": self.session.authType,
-                    "base": "identity://" + self.session.requested.identity.provider + "/"
+                    "base": self.session.requested.identity.base
                 }
             }, function (err, result) {
                 if (err) throw err;
