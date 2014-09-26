@@ -7,6 +7,8 @@ BODY {
     background-size: cover;
     font-family: Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif;
     font-size: 14px;
+    margin: 0px;
+    padding: 0px;
 }
 
 DIV.op-centered {
@@ -23,6 +25,7 @@ DIV#op-spinner {
     display: inline-block;
     width: 64px;
     height: 64px;
+    margin-top: 10px;
 }
 
 DIV.op-error {
@@ -48,6 +51,7 @@ DIV.op-view {
     display: inline-block;
     width: 250px;
     text-align: center;
+    margin: 10px;
 }
 
 DIV.op-view LABEL {
@@ -84,11 +88,8 @@ DIV.op-view DIV.op-fieldset > DIV.op-fieldset-actions {
 }
 
 DIV.op-view BUTTON {
-    background-image: url(images/buttonbg2.png);
-    background-repeat: repeat-x;
-    border: 0px;
-    border-radius: 4px;
     font-size: 18px;
+    border-width: 2px;
     cursor: pointer;
     padding: 5px;
     padding-left: 10px;
@@ -126,10 +127,12 @@ A.op-buttonlink {
     margin-top: 40px;
     margin-bottom: 20px;
 }
-#op-social-facebook-view {
+#op-service-facebook-view,
+#op-service-facebook_v1-view {
     text-align: center;
 }
-#op-social-facebook-button {
+#op-service-facebook-button,
+#op-service-facebook_v1-button {
     margin-top: 50px;
     border: 0px;
     padding: 0px;
@@ -138,6 +141,7 @@ A.op-buttonlink {
     background-color: transparent;
 }
 
-#op-social-facebook-button > IMG {
+#op-service-facebook-button > IMG,
+#op-service-facebook_v1-button > IMG {
     width: 200px;
 }

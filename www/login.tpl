@@ -92,6 +92,9 @@ either expressed or implied, of the FreeBSD Project.
         });        
     });
 
+    /**
+     * For testing
+     */
     window.addEventListener("message", function (event) {
         try {
             var message = JSON.parse(event.data);
@@ -109,7 +112,6 @@ either expressed or implied, of the FreeBSD Project.
             throw e;
         }
     }, false);
-
     function doRegister(name, username, password) {
         HF.showView('federated-signup');
         $('#signUpDisplayName').val(name);
@@ -117,13 +119,13 @@ either expressed or implied, of the FreeBSD Project.
         $('#signUpPassword').val(password);
         $('#op-federated-signup-button').click()
     }
-
     function doLogin(username, password){
         HF.showView('federated-login');
         $('#loginId').val(username);
         $('#loginPassword').val(password);
         $('#op-federated-login-button').click();
     }
+
 </script>
 </head>
 
