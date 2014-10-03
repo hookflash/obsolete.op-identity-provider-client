@@ -20,7 +20,7 @@ sudo chmod -Rf ug+x $PIO_SCRIPTS_PATH
 #######################################################
 
 
-echo "Linking service into apache document root ..."
-rm -f /var/www/html/$PIO_SERVICE_ID || true
-ln -s $PIO_SERVICE_PATH/live/install /var/www/html/$PIO_SERVICE_ID
-chown -Rf www-data:www-data $PIO_SERVICE_PATH/live/install
+#echo "Linking service into apache document root ..."
+#rm -f /var/www/html/$PIO_SERVICE_ID || true
+#ln -s $PIO_SERVICE_PATH/live/install /var/www/html/$PIO_SERVICE_ID
+#chown -Rf www-data:www-data $PIO_SERVICE_PATH/live/install
