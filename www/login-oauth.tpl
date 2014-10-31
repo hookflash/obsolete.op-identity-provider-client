@@ -10,6 +10,13 @@
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/jquery/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/HF-oauth.js"></script>
 
+<style>
+HTML, BODY, DIV.op-centered {
+    border-image: none;
+    background-color: #{{ config.CONFIG_loginBackgroundColor }};
+}
+</style>
+
 <script type="text/javascript">
 
     window.__LOGGER.setUrl("//{{ config.HF_LOGGER_HOST }}/tools/logger/record");
