@@ -677,7 +677,14 @@
                     "accessSecretExpires": self.session.login.identity.accessSecretExpires,                            
                     "uri": self.session.login.identity.uri,
                     "provider": self.session.requested.identity.provider,
-                    "reloginKey": self.session.reloginKey
+                    "reloginKey": self.session.reloginKey,
+
+                    // HACK: Remove after protocol fixes when peer-lookup is done on startup.
+                    "name": self.session.login.identity.name,
+                    "profile": self.session.login.identity.profile,
+                    "vprofile": self.session.login.identity.vprofile,
+                    "feed": self.session.login.identity.feed,
+                    "avatars": self.session.login.identity.avatars
                 }
             };
             if (self.session.lockboxKey) {
