@@ -3,12 +3,14 @@
 <head>
 <title>Example Identity Provider</title>
 
-<link rel="stylesheet" href="{{ config.ASSET_PATH }}/style-oauth.css"/>
+<style>
+HTML, BODY, DIV.op-centered {
+    border-image: none;
+    background-color: #{{ config.CONFIG_loginBackgroundColor }};
+}
+</style>
 
-<script type="text/javascript" src="//{{ config.HF_LOGGER_HOST }}/tools/logger/logger.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/sha1.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/jquery/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/HF-oauth.js"></script>
+<link rel="stylesheet" href="{{ config.ASSET_PATH }}/style-oauth.css"/>
 
 <style>
 HTML, BODY, DIV.op-centered {
@@ -16,6 +18,11 @@ HTML, BODY, DIV.op-centered {
     background-color: #{{ config.CONFIG_loginBackgroundColor }};
 }
 </style>
+
+<script type="text/javascript" src="//{{ config.HF_LOGGER_HOST }}/tools/logger/logger.js"></script>
+<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/sha1.js"></script>
+<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/jquery/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="{{ config.ASSET_PATH }}/js/HF-oauth.js"></script>
 
 <script type="text/javascript">
 

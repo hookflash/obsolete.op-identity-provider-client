@@ -1,14 +1,17 @@
 
+HTML {
+    height: 100%;
+}
+
 BODY {
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: rgb(65, 123, 134);
-    background-image: url(images/iPhone_background.png);
-    background-size: cover;
+    background: none;
     font-family: Arial, 'Liberation Sans', 'DejaVu Sans', sans-serif;
     font-size: 14px;
     margin: 0px;
     padding: 0px;
+    height: 100%;
 }
 
 DIV.op-centered {
