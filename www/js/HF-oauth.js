@@ -636,16 +636,16 @@
                     }
         */
                     var lockboxKey = self.session.login.lockbox.key || null;
-                    if (lockboxKey) {
+                    //if (!lockboxKey) {
                         // TODO: Implement key hashing properly instead of getting key from 'result.identity.accessSecret'. [Security]
-                        lockboxKey = self.session.login.identity.accessSecret;
+                    //    lockboxKey = self.session.login.identity.accessSecret;
                         /*
                         var iv = hash(identity.secretSalt);
                         log("identityAccessCompleteNotify", "iv", iv);
                         var key = decryptLockbox(lockboxkey, identity.passwordStretched, identity.identifier, iv);
                         log("identityAccessCompleteNotify", "key", key);
                         */
-                    }
+                    //}
 
                     self.session.reloginKey = self.session.login.identity.reloginKey;
                     self.session.lockboxKey = lockboxKey;
@@ -665,6 +665,9 @@
             if (self.session.status !== "loggedin") {
                 throw new Error("Session status must be set to 'loggedin'");
             }
+
+            log("Client->sendAccessComplete() - self.session", self.session);
+
             var notify = {
                 "$domain": self.session.$domain,
                 "$appid": self.session.$appid,
