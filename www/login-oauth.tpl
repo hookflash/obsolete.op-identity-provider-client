@@ -19,14 +19,14 @@ HTML, BODY, DIV.op-centered {
 }
 </style>
 
-<script type="text/javascript" src="//{{ config.HF_LOGGER_HOST }}/tools/logger/logger.js"></script>
+<script type="text/javascript" src="//{{ config.HF_LOGGER_HOST }}{{ config.HF_LOGGER_API_LOGGER }}"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/cryptojs/rollups/sha1.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/lib/jquery/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="{{ config.ASSET_PATH }}/js/HF-oauth.js"></script>
 
 <script type="text/javascript">
 
-    window.__LOGGER.setUrl("//{{ config.HF_LOGGER_HOST }}/tools/logger/record");
+    window.__LOGGER.setUrl("//{{ config.HF_LOGGER_HOST }}{{ config.HF_LOGGER_API_RECORD }}");
     window.__LOGGER.setChannel("identity-provider-js-all");
 
     $(document).ready(function() {
